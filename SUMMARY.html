@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plivo 2000 Step LLM Speedrun - Summary</title>
+    <style>
+        body { font-family: system-ui, -apple-system, sans-serif; line-height: 1.6; max-width: 800px; margin: 0 auto; padding: 2rem; color: #333; }
+        h1, h2 { color: #111; border-bottom: 2px solid #eee; padding-bottom: 0.5rem; }
+        .section { margin-bottom: 2rem; padding: 1.5rem; background: #f8f9fa; border-radius: 8px; border-left: 4px solid #0056b3; }
+        ul { margin-top: 0.5rem; }
+    </style>
+</head>
+<body>
+    <h1>LLM Speedrun Submission Summary</h1>
+    
+    <div class="section">
+        <h2>Architecture & Parameter Overview</h2>
+        <p>The final model is an autoregressive Transformer (GPT-style) configured to hit ~1.87M parameters, safely under the 2,000,000 cap. The core architecture relies on <strong>4 transformer blocks</strong>, a hidden dimension of <strong>192</strong>, and <strong>6 attention heads</strong>. Weight tying was utilized between the token embedding and the output head to save parameter space, allowing for wider dense layers within the blocks.</p>
+    </div>
+
+    <div class="section">
+        <h2>Optimal Hyperparameters</h2>
+        <ul>
+            <li><strong>Optimizer:</strong> AdamW (Weight decay: 0.1)</li>
+            <li><strong>Learning Rate:</strong> Max 2e-3 with Cosine Annealing and 150-step Warmup</li>
+            <li><strong>Batch Size:</strong> 32</li>
+            <li><strong>Context Window:</strong> 256 tokens</li>
+            <li><strong>Dropout:</strong> 0.0 (Removed to maximize short-term adaptation)</li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <h2>Methodology & Justification</h2>
+        <p>The primary metric of Bits Per Byte (bpb) was best optimized by treating this as an underfitting problem rather than an overfitting problem. A short 2,000-step run requires highly aggressive learning dynamics. By disabling dropout, increasing the batch size to 32, and raising the peak learning rate to 2e-3, the model was forced to converge rapidly. Experimental runs showed that extending the context window to 512 tokens degraded the bpb, proving that the model did not have enough steps to learn longer positional embeddings efficiently.</p>
+    </div>
+
+    <div class="section">
+        <h2>Human vs. Machine Contribution</h2>
+        <p><strong>Machine Assistance:</strong> The AI coding assistant was responsible for generating the boilerplate PyTorch transformer code, implementing the cosine learning rate scheduler math, modifying the tokenizer to ensure strict UTF-8 compliance without bloating the vocabulary, and generating this HTML summary document.</p>
+        <p><strong>Human Intervention:</strong> Human effort was focused on scientific testing, tracking the RUNLOG, navigating the local directory file-path issues to ensure the pipeline executed correctly, and making the strategic architectural decisions (such as realizing dropout was hindering short-term performance and reverting the block_size expansion when it failed to yield dev set improvements).</p>
+    </div>
+</body>
+</html>
